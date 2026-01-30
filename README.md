@@ -41,3 +41,9 @@ You should see logs like:
 2026-01-30 12:42:25,922 ERROR timeout after 5s; server may be locked up
 2026-01-30 12:42:25,949 INFO websocket sent {'type': 'ping', 'count': 27}
 ```
+
+Key files to inspect:
+- `app/views.py` (DRF viewset + serializer)
+- `app/consumers.py` (WebSocket consumer)
+- `scripts/lockup_test.py` (repro script driving WebSocket + HTTP)
+- `app/urls.py` (DefaultRouter wiring)
