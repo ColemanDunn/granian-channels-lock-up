@@ -1,0 +1,14 @@
+[project]
+name = "granian-channels-lock-up"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.0.1",
+    "channels>=4.0.0",
+    "djangorestframework>=3.14.0",
+    "granian>=1.6.4",
+    "websocket-client>=1.9.0",
+    "requests>=2.32.5",
+]
