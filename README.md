@@ -12,38 +12,23 @@ Apply migrations:
 uv run python manage.py migrate
 ```
 
-Serve with Granian (ASGINL):
+Minimal automated repro (starts Granian + driver, auto-picks a free port, deletes pass artifacts):
 
 ```bash
-uv run granian --interface asginl config.asgi:application
+uv run --no-sync python scripts/repro_lockup.py
 ```
 
-Run the lockup test script in another terminal:
-
-```bash
-uv run python scripts/lockup_test.py
-```
-
-You should see logs like:
+When it locks up, you will see `ws_recv_timeout` / `http_timeout` start incrementing and the run will end with a non-zero `lockup_count`:
 
 ```text
-2026-01-30 12:42:19,844 INFO users status=200
-2026-01-30 12:42:19,920 INFO websocket sent {'type': 'ping', 'count': 21}
-2026-01-30 12:42:20,061 INFO users status=200
-2026-01-30 12:42:20,277 INFO users status=200
-2026-01-30 12:42:20,496 INFO users status=200
-2026-01-30 12:42:20,712 INFO users status=200
-2026-01-30 12:42:20,924 INFO websocket sent {'type': 'ping', 'count': 22}
-2026-01-30 12:42:21,931 INFO websocket sent {'type': 'ping', 'count': 23}
-2026-01-30 12:42:22,935 INFO websocket sent {'type': 'ping', 'count': 24}
-2026-01-30 12:42:23,939 INFO websocket sent {'type': 'ping', 'count': 25}
-2026-01-30 12:42:24,945 INFO websocket sent {'type': 'ping', 'count': 26}
-2026-01-30 12:42:25,922 ERROR timeout after 5s; server may be locked up
-2026-01-30 12:42:25,949 INFO websocket sent {'type': 'ping', 'count': 27}
+00:48:23 INFO status lockups=0 stats={'ws_send': 442, 'ws_recv': 442, 'http_ok': 1548}
+00:48:28 INFO status lockups=0 stats={'ws_send': 488, 'ws_recv': 484, 'http_ok': 1720, 'ws_recv_timeout': 2}
+00:48:42 INFO run end lockups=3 elapsed_s=57.677 stats={'ws_send': 494, 'ws_recv': 484, 'http_ok': 1767, 'ws_recv_timeout': 10, 'http_timeout': 1}
+{"run_id": "004738_69526", "port": 8001, "run_dir": ".../granian_channels_lock_up/scripts/repro_artifacts/run_004738_69526_p8001", "start_error": null, "lockup_count": 3, "elapsed_seconds": 57.6767558749998, "server_returncode": -9}
 ```
 
 Key files to inspect:
 - `app/views.py` (DRF viewset + serializer)
 - `app/consumers.py` (WebSocket consumer)
-- `scripts/lockup_test.py` (repro script driving WebSocket + HTTP)
+- `scripts/repro_lockup.py` (minimal repro: starts server + driver, auto-deletes pass artifacts)
 - `app/urls.py` (DefaultRouter wiring)

@@ -132,7 +132,6 @@ class RunResult:
     lockup_count: int
     elapsed_seconds: float
     server_returncode: int | None
-    granian_source: str
 
 
 class LockupTracker:
@@ -312,9 +311,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--keep-pass-logs", action="store_true")
     p.add_argument("--run-id", default="", help="Default is a timestamp-based id.")
 
-    p.add_argument("--granian-source", default="installed", choices=["installed", "editable"])
-    p.add_argument("--granian-editable-path", default="./granian")
-
     p.add_argument("--granian-workers", type=int, default=4)
     p.add_argument("--granian-runtime-threads", type=int, default=1)
     p.add_argument("--granian-runtime-blocking-threads", type=int, default=2, help="0 omits the flag (auto)")
@@ -363,7 +359,6 @@ def main() -> int:
         "port": port,
         "http_url": http_url,
         "ws_url": ws_url,
-        "granian_source": args.granian_source,
     }
     (run_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
 
@@ -373,8 +368,6 @@ def main() -> int:
     exit_code = 0
 
     server_cmd: list[str] = ["uv", "run", "--no-sync"]
-    if args.granian_source == "editable":
-        server_cmd += ["--with-editable", args.granian_editable_path]
     server_cmd += [
         "granian",
         "--interface",
@@ -500,7 +493,6 @@ def main() -> int:
             lockup_count=lockup_count,
             elapsed_seconds=elapsed,
             server_returncode=server_proc.returncode if server_proc is not None else None,
-            granian_source=args.granian_source,
         )
         (run_dir / "result.json").write_text(json.dumps(asdict(result), indent=2) + "\n", encoding="utf-8")
 
